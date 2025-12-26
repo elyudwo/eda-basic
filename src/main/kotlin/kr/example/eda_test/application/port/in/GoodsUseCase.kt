@@ -1,7 +1,6 @@
 package kr.example.eda_test.application.port.`in`
 
 import kotlinx.coroutines.future.await
-import kr.example.eda_test.application.port.out.GoodsCreatedEvent
 import org.springframework.kafka.core.KafkaTemplate
 import org.springframework.stereotype.Service
 
@@ -11,9 +10,10 @@ class GoodsUseCase(
 ) {
 
     suspend fun createGoods(createGoodsCommand: CreateGoodsCommand): String {
-        val event = GoodsCreatedEvent(
-            name = createGoodsCommand.name,
-            price = createGoodsCommand.price
+        // Avro 생성 클래스 사용
+        val event = kr.example.eda_test.event.GoodsCreatedEvent(
+            createGoodsCommand.name,
+            createGoodsCommand.price
         )
 
         kafkaTemplate.send("goods-created", event)
