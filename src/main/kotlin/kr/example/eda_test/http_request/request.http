@@ -1,4 +1,4 @@
-### goods 인덱스 데이터 추가
+### goods 토픽에 카프카 메시지 발행
 POST http://localhost:8080/api/stock
 Content-Type: application/json
 
@@ -7,86 +7,50 @@ Content-Type: application/json
   "price": 20000
 }
 
-### goods 인덱스 데이터 추가 (한글)
-POST http://localhost:8080/api/goods
+###############################################
+# Temporal Workflow
+###############################################
+
+### Temporal로 상품 생성 (워크플로우 시작)
+POST http://localhost:8080/api/temporal/goods
 Content-Type: application/json
 
 {
-  "name": "노트북",
-  "price": 1500000,
-  "description": "고성능 게이밍 노트북",
-  "adminMemo": "Memo Test"
+  "name": "MacBook Pro M3",
+  "price": 2500000
 }
 
-### goods 인덱스 데이터 추가 (비동기)
-POST http://localhost:8080/api/goods/async
+### Temporal로 상품 생성 - 샘플 2
+POST http://localhost:8080/api/temporal/goods
 Content-Type: application/json
 
 {
-  "name": "lee yeong jae",
-  "price": 10000,
-  "description": "hello",
-  "adminMemo": "normal user"
+  "name": "iPhone 15 Pro",
+  "price": 1500000
 }
 
-### goods 인덱스 데이터 delete_by_query(가격 범위)로 삭제
-DELETE http://localhost:8080/api/goods
+### Temporal로 상품 생성 - 유효성 검증 실패 케이스 (가격 0)
+POST http://localhost:8080/api/temporal/goods
 Content-Type: application/json
 
 {
-  "minPrice": 15000,
-  "maxPrice": 20000
+  "name": "Invalid Product",
+  "price": 0
 }
 
-### Goods 목록 조회 (페이지 0)
-GET http://localhost:8080/api/goods?page=0&size=3
-
-### Goods 목록 조회 (페이지 1)
-GET http://localhost:8080/api/goods?page=1&size=10
-
-### Goods 검색 (name으로)
-GET http://localhost:8080/api/goods/search?name=노트북
-
-### Goods 검색 (description으로)
-GET http://localhost:8080/api/goods/search?description=게이밍
-
-### Goods Bool 검색 (must + filter)
-POST http://localhost:8080/api/goods/search/bool
+### Temporal로 상품 생성 - 유효성 검증 실패 케이스 (이름 공백)
+POST http://localhost:8080/api/temporal/goods
 Content-Type: application/json
 
 {
-  "mustDescription": "게이밍",
-  "filterMinPrice": 100000,
-  "filterMaxPrice": 2000000
+  "name": "",
+  "price": 100000
 }
 
-### Goods Bool 검색 (must + must_not)
-POST http://localhost:8080/api/goods/search/bool
-Content-Type: application/json
+### 워크플로우 상태 조회 (workflowId를 위 응답에서 복사하여 사용)
+GET http://localhost:8080/api/temporal/goods/goods-creation-12345678-1234-1234-1234-123456789abc
 
-{
-  "mustDescription": "노트북",
-  "mustNotAdminMemo": "일반고객"
-}
-
-### Goods Bool 검색 (should - OR 조건)
-POST http://localhost:8080/api/goods/search/bool
-Content-Type: application/json
-
-{
-  "shouldDescription": ["게이밍", "무선", "고성능"],
-  "minimumShouldMatch": 1
-}
-
-### Goods Bool 검색 (복합 조건)
-POST http://localhost:8080/api/goods/search/bool
-Content-Type: application/json
-
-{
-  "mustName": "노트북",
-  "mustNotAdminMemo": "블랙리스트",
-  "filterMinPrice": 1000000,
-  "filterMaxPrice": 2000000,
-  "shouldDescription": ["게이밍", "고성능"],
-  "minimumShouldMatch": 1
-}
+###############################################
+# 참고: Temporal UI에서 워크플로우 모니터링
+# http://localhost:8088
+###############################################
