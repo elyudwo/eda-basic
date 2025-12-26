@@ -1,0 +1,23 @@
+{
+  "type": "record",
+  "name": "GoodsCreatedEvent",
+  "namespace": "kr.example.eda_test.event",
+  "doc": "Event published when a new goods is created",
+  "fields": [
+    {
+      "name": "name",
+      "type": "string",
+      "doc": "The name of the goods"
+    },
+    {
+      "name": "price",
+      "type": {
+        "type": "bytes",
+        "logicalType": "decimal",
+        "precision": 19,
+        "scale": 2
+      },
+      "doc": "The price of the goods"
+    }
+  ]
+}
