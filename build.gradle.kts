@@ -43,6 +43,10 @@ dependencies {
     implementation("io.confluent:kafka-avro-serializer:7.6.0")
     implementation("io.confluent:kafka-schema-registry-client:7.6.0")
 
+    // Temporal
+    implementation("io.temporal:temporal-sdk:1.22.3")
+    implementation("io.temporal:temporal-kotlin:1.22.3")
+
 }
 
 kotlin {
