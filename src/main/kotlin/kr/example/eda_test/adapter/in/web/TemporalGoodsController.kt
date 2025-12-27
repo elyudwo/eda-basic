@@ -2,6 +2,8 @@ package kr.example.eda_test.adapter.`in`.web
 
 import io.temporal.client.WorkflowClient
 import io.temporal.client.WorkflowOptions
+import kr.example.eda_test.adapter.out.CreateGoodsResponse
+import kr.example.eda_test.adapter.out.GetWorkFlowStatusResponse
 import kr.example.eda_test.application.port.`in`.CreateGoodsCommand
 import kr.example.eda_test.config.TemporalConfig
 import kr.example.eda_test.temporal.workflow.GoodsWorkflow
@@ -17,7 +19,7 @@ class TemporalGoodsController(
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    suspend fun createGoodsWithTemporal(@RequestBody request: CreateGoodsRequest): Map<String, String> {
+    suspend fun createGoodsWithTemporal(@RequestBody request: CreateGoodsRequest): CreateGoodsResponse {
         val command = CreateGoodsCommand(
             name = request.name,
             price = request.price,
@@ -38,30 +40,30 @@ class TemporalGoodsController(
         // 워크플로우 비동기 실행
         WorkflowClient.start(workflow::createGoods, command)
 
-        return mapOf(
-            "workflowId" to workflowId,
-            "message" to "Goods creation workflow started"
+        return CreateGoodsResponse(
+            workflowId = workflowId,
+            message = "Goods creation workflow started",
         )
     }
 
     @GetMapping("/{workflowId}")
-    fun getWorkflowStatus(@PathVariable workflowId: String): Map<String, Any> {
+    fun getWorkflowStatus(@PathVariable workflowId: String): GetWorkFlowStatusResponse {
         // 워크플로우 스텁 가져오기
         val workflow = workflowClient.newWorkflowStub(GoodsWorkflow::class.java, workflowId)
 
         return try {
             // 워크플로우 결과 조회 (완료된 경우)
             val result = workflow.createGoods(CreateGoodsCommand("", java.math.BigDecimal.ZERO))
-            mapOf(
-                "workflowId" to workflowId,
-                "status" to "COMPLETED",
-                "result" to result
+            GetWorkFlowStatusResponse(
+                workflowId = workflowId,
+                status = "COMPLETED",
+                result = result
             )
         } catch (e: Exception) {
-            mapOf(
-                "workflowId" to workflowId,
-                "status" to "RUNNING or FAILED",
-                "message" to "Use Temporal UI to check detailed status"
+            GetWorkFlowStatusResponse(
+                workflowId = workflowId,
+                status = "RUNNING or FAILED",
+                result = "Use Temporal UI to check detailed status"
             )
         }
     }

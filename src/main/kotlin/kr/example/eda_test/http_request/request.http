@@ -16,8 +16,8 @@ POST http://localhost:8080/api/temporal/goods
 Content-Type: application/json
 
 {
-  "name": "MacBook Pro M3",
-  "price": 2500000
+  "name": "new temporal workflow",
+  "price": 1111
 }
 
 ### Temporal로 상품 생성 - 샘플 2
@@ -48,7 +48,7 @@ Content-Type: application/json
 }
 
 ### 워크플로우 상태 조회 (workflowId를 위 응답에서 복사하여 사용)
-GET http://localhost:8080/api/temporal/goods/goods-creation-12345678-1234-1234-1234-123456789abc
+GET http://localhost:8080/api/temporal/goods/goods-creation-ec0b4a60-176e-48f1-b6a4-2843625466c6
 
 ###############################################
 # 참고: Temporal UI에서 워크플로우 모니터링
