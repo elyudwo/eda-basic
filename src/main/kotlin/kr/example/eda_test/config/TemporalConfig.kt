@@ -4,9 +4,7 @@ import io.temporal.client.WorkflowClient
 import io.temporal.client.WorkflowClientOptions
 import io.temporal.serviceclient.WorkflowServiceStubs
 import io.temporal.serviceclient.WorkflowServiceStubsOptions
-import io.temporal.worker.Worker
 import io.temporal.worker.WorkerFactory
-import jakarta.annotation.PostConstruct
 import jakarta.annotation.PreDestroy
 import kr.example.eda_test.temporal.activity.GoodsActivitiesImpl
 import kr.example.eda_test.temporal.workflow.GoodsWorkflowImpl
@@ -20,6 +18,7 @@ class TemporalConfig(
 ) {
 
     private val logger = LoggerFactory.getLogger(javaClass)
+    private var workerFactoryInstance: WorkerFactory? = null
 
     companion object {
         const val TASK_QUEUE = "GOODS_TASK_QUEUE"
@@ -45,12 +44,13 @@ class TemporalConfig(
 
     @Bean
     fun workerFactory(workflowClient: WorkflowClient): WorkerFactory {
-        return WorkerFactory.newInstance(workflowClient)
-    }
+        logger.info("Creating and starting Temporal worker...")
 
-    @Bean
-    fun goodsWorker(workerFactory: WorkerFactory): Worker {
-        val worker = workerFactory.newWorker(TASK_QUEUE)
+        val factory = WorkerFactory.newInstance(workflowClient)
+        workerFactoryInstance = factory
+
+        // Worker 생성 및 등록
+        val worker = factory.newWorker(TASK_QUEUE)
 
         // 워크플로우 등록
         worker.registerWorkflowImplementationTypes(GoodsWorkflowImpl::class.java)
@@ -58,21 +58,16 @@ class TemporalConfig(
         // 액티비티 등록
         worker.registerActivitiesImplementations(goodsActivities)
 
-        return worker
-    }
-
-    @PostConstruct
-    fun startWorker() {
-        logger.info("Starting Temporal worker...")
-        val workerFactory = workerFactory(workflowClient(workflowServiceStubs()))
-        goodsWorker(workerFactory)
-        workerFactory.start()
+        // Worker 시작
+        factory.start()
         logger.info("Temporal worker started successfully")
+
+        return factory
     }
 
     @PreDestroy
     fun shutdownWorker() {
         logger.info("Shutting down Temporal worker...")
-        workflowServiceStubs().shutdown()
+        workerFactoryInstance?.shutdown()
     }
 }
